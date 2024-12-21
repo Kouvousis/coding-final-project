@@ -1,0 +1,19 @@
+# VS Code
+.vscode/
+.vs/
+*.code-workspace
+
+# Python virtual environment
+venv/
+env/
+.env/
+.venv/
+ENV/
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Django database
+db.sqlite3
