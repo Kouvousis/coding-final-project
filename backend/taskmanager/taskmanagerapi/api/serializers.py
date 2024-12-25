@@ -1,6 +1,8 @@
 from rest_framework import serializers
+from rest_framework_simplejwt.tokens import RefreshToken
 from taskmanagerapi.models import Task
 from django.contrib.auth.models import User
+from django.contrib.auth import authenticate
         
 class TaskSerializer(serializers.ModelSerializer):
     class Meta:
@@ -29,3 +31,29 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             password=validated_data['password']
         )
         return user
+    
+class LoginSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    password = serializers.CharField(write_only=True)
+    
+    def validate(self, data):
+        username = data.get('username')
+        password = data.get('password')
+        
+        if username and password:
+            user = authenticate(username=username, password=password)
+            if not user:
+                raise serializers.ValidationError('Invalid credentials')
+            
+            refresh = RefreshToken.for_user(user)
+            data['tokens'] = {
+                'refresh': str(refresh),
+                'access': str(refresh.access_token)
+            }
+            data['user'] = {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email
+            }
+            return data
+        raise serializers.ValidationError('Must include username and password')

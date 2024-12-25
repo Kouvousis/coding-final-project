@@ -2,10 +2,13 @@ from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.response import Response
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.db.utils import IntegrityError
 from ..models import Task
-from .serializers import TaskSerializer, UserRegistrationSerializer
+from .serializers import TaskSerializer, UserRegistrationSerializer, LoginSerializer
 
 class TaskViewSet(viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication]
@@ -44,5 +47,40 @@ class UserViewSet(viewsets.ModelViewSet):
         except Exception as e:
             return Response(
                 {'error': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+            
+class LoginView(TokenObtainPairView):
+    serializer_class = LoginSerializer
+
+    def post(self, request, *args, **kwargs):
+        try:
+            username = request.data.get('username')
+            password = request.data.get('password')
+            user = authenticate(username=username, password=password)
+            
+            if not user:
+                return Response(
+                    {'error': 'Invalid credentials'}, 
+                    status=status.HTTP_401_UNAUTHORIZED
+                )
+
+            refresh = RefreshToken.for_user(user)
+            
+            return Response({
+                'tokens': {
+                    'access': str(refresh.access_token),
+                    'refresh': str(refresh)
+                },
+                'user': {
+                    'id': user.id,
+                    'username': user.username,
+                    'email': user.email
+                }
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response(
+                {'error': str(e)}, 
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
