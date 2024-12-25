@@ -9,10 +9,20 @@ function NavigationBar({ onNavigate }) {
     onNavigate("home");
   };
 
+  const handleLoginClick = (e) => {
+    e.preventDefault();
+    onNavigate("login");
+  };
+
+  const handleRegisterClick = (e) => {
+    e.preventDefault();
+    onNavigate("register");
+  };
+
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
       <div className="container">
-        <a className="navbar-brand" href="#" onClick={handleHomeClick}>
+        <a className="navbar-brand" href="" onClick={handleHomeClick}>
           Task Manager
         </a>
         <button
@@ -28,19 +38,19 @@ function NavigationBar({ onNavigate }) {
             {!isLoggedIn ? (
               <>
                 <li className="nav-item">
-                  <a className="nav-link" href="#login">
+                  <a className="nav-link" href="" onClick={handleLoginClick}>
                     Login
                   </a>
                 </li>
                 <li className="nav-item">
-                  <a className="nav-link" href="#register">
+                  <a className="nav-link" href="" onClick={handleRegisterClick}>
                     Register
                   </a>
                 </li>
               </>
             ) : (
               <li className="nav-item">
-                <a className="nav-link" href="#logout">
+                <a className="nav-link" href="">
                   Logout
                 </a>
               </li>
