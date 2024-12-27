@@ -2,7 +2,7 @@ from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.response import Response
-from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
@@ -50,7 +50,7 @@ class UserViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
             
-class LoginView(TokenObtainPairView):
+class LoginView(APIView):
     serializer_class = LoginSerializer
 
     def post(self, request, *args, **kwargs):
