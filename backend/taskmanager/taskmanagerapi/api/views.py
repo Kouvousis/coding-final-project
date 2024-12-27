@@ -73,7 +73,6 @@ class LoginView(APIView):
                     'refresh': str(refresh)
                 },
                 'user': {
-                    'id': user.id,
                     'username': user.username,
                     'email': user.email
                 }
