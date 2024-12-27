@@ -4,14 +4,15 @@ from rest_framework.authentication import SessionAuthentication, BasicAuthentica
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.db.utils import IntegrityError
 from ..models import Task
 from .serializers import TaskSerializer, UserRegistrationSerializer, LoginSerializer
-
+#TODO Create Profiles for users
 class TaskViewSet(viewsets.ModelViewSet):
-    authentication_classes = [SessionAuthentication, BasicAuthentication]
+    authentication_classes = [JWTAuthentication, SessionAuthentication, BasicAuthentication]
     serializer_class = TaskSerializer
     permission_classes = [IsAuthenticated]
     
@@ -84,3 +85,9 @@ class LoginView(APIView):
                 {'error': str(e)}, 
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+            
+class ProtectedView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        return Response({'message': 'This is a protected view'}, status=status.HTTP_200_OK)

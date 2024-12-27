@@ -7,9 +7,8 @@ from django.contrib.auth import authenticate
 class TaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
-        fields = ['id', 'title', 'description', 'due_date', 'created_at', 'updated_at', 
-                 'completed', 'completed_at', 'priority']
-        read_only_fields = ['user', 'created_at', 'updated_at', 'completed_at']
+        fields = ['id', 'title', 'description', 'due_date', 'priority', 'created_at', 'updated_at', 'completed', 'completed_at']
+        read_only_fields = ['id', 'created_at', 'updated_at', 'completed', 'completed_at', 'user']
         
         
 class UserRegistrationSerializer(serializers.ModelSerializer):
