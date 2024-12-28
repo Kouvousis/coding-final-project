@@ -1,10 +1,13 @@
 import { useState } from "react";
+import PropTypes from "prop-types";
+import Cookies from "js-cookie";
 
-function LoginForm() {
+function LoginForm({ setIsLoggedIn, onNavigate }) {
   const [formData, setFormData] = useState({
     username: "",
     password: "",
   });
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
   const handleChange = (e) => {
@@ -15,8 +18,10 @@ function LoginForm() {
     }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
+    setError("");
     try {
       const response = await fetch("http://localhost:8000/api/login/", {
         method: "POST",
@@ -26,13 +31,20 @@ function LoginForm() {
         body: JSON.stringify(formData),
       });
 
+      const data = await response.json();
+
       if (response.ok) {
-        // Handle successful login
+        Cookies.set("access_token", data.tokens.access);
+        Cookies.set("refresh_token", data.tokens.refresh);
+        setIsLoggedIn(true);
+        onNavigate("home");
       } else {
         setError("Invalid credentials");
       }
     } catch {
       setError("Network error occurred");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -44,7 +56,7 @@ function LoginForm() {
             <div className="card-body">
               <h3 className="card-title text-center mb-4">Login</h3>
               {error && <div className="alert alert-danger">{error}</div>}
-              <form onSubmit={handleSubmit}>
+              <form onSubmit={handleLogin}>
                 <div className="mb-3">
                   <label htmlFor="username" className="form-label">
                     Username
@@ -73,8 +85,12 @@ function LoginForm() {
                     required
                   />
                 </div>
-                <button type="submit" className="btn btn-primary w-100">
-                  Login
+                <button
+                  type="submit"
+                  className="btn btn-primary w-100"
+                  disabled={isLoading}
+                >
+                  {isLoading ? "Logging in..." : "Login"}
                 </button>
               </form>
             </div>
@@ -84,5 +100,10 @@ function LoginForm() {
     </div>
   );
 }
+
+LoginForm.propTypes = {
+  onNavigate: PropTypes.func.isRequired,
+  setIsLoggedIn: PropTypes.func.isRequired,
+};
 
 export default LoginForm;

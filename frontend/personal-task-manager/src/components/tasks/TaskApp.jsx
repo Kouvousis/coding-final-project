@@ -1,15 +1,121 @@
-import { useState } from "react";
-import RegistrationForm from "../registration/RegistrationForm";
+import { useEffect, useState } from "react";
+import Cookies from "js-cookie";
 
 function TaskApp() {
-  const [isLoggedIn] = useState(true);
-  const [showRegister] = useState(false);
+  const [tasks, setTasks] = useState([]);
+  const [newTask, setNewTask] = useState({
+    title: "",
+    description: "",
+    due_date: "",
+    priority: "Low",
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const fetchAllTasks = async () => {
+    setIsLoading(true);
+    setError("");
+
+    try {
+      const token = Cookies.get("access_token");
+      const response = await fetch("http://localhost:8000/api/tasks/", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const tasks = await response.json();
+        const taskContainer = document.getElementById("task-container");
+        taskContainer.innerHTML = ""; // Clear existing tasks
+
+        tasks.forEach((task) => {
+          const taskElement = document.createElement("div");
+          taskElement.className = "task";
+
+          taskElement.innerHTML = `
+          <div class="card-body">
+            <h5 class="card-title">${task.title}</h5>
+            <p class="card-text">${task.description}</p>
+            <p class="card-text"><small class="text-muted">Due Date: ${
+              task.due_date
+            }</small></p>
+            <p class="card-text"><small class="text-muted">Priority: ${
+              task.priority
+            }</small></p>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" ${
+                task.completed ? "checked" : ""
+              } disabled>
+              <label class="form-check-label">
+                Completed
+              </label>
+            </div>
+            <div class="d-flex justify-content-end">
+              <button class="btn btn-success complete-btn me-2">Complete</button>
+              <button class="btn btn-danger delete-btn">Delete</button>
+            </div>
+          </div>
+        `;
+
+          taskContainer.appendChild(taskElement);
+        });
+      } else {
+        setError("Failed to fetch tasks");
+      }
+    } catch {
+      setError("Network error occurred");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const token = Cookies.get("access_token");
+      const response = await fetch("http://localhost:8000/api/tasks/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(newTask),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setTasks([...tasks, data]);
+        setNewTask({ title: "", description: "" });
+      }
+    } catch {
+      setError("Failed to create task");
+    }
+  };
+
+  const checkToken = () => {
+    const token = Cookies.get("access_token");
+    return !!token;
+  };
+
+  useEffect(() => {
+    if (checkToken()) {
+      fetchAllTasks();
+    }
+  }, []);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setNewTask((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
 
   return (
     <div className="container">
-      {showRegister ? (
-        <RegistrationForm />
-      ) : !isLoggedIn ? (
+      {!checkToken() ? (
         <div className="row justify-content-center">
           <div className="col-md-6 text-center">
             <h1 className="mb-4">Welcome to Task Manager</h1>
@@ -24,18 +130,27 @@ function TaskApp() {
                 <h5 className="card-title mb-0">Add New Task</h5>
               </div>
               <div className="card-body">
-                <form>
+                {error && <div className="alert alert-danger">{error}</div>}
+                <form onSubmit={handleSubmit}>
                   <div className="mb-3">
                     <input
                       type="text"
                       className="form-control"
                       placeholder="Task title"
+                      name="title"
+                      value={newTask.title}
+                      onChange={handleChange}
+                      required
                     />
                   </div>
                   <div className="mb-3">
                     <textarea
                       className="form-control"
                       placeholder="Task description"
+                      name="description"
+                      value={newTask.description}
+                      onChange={handleChange}
+                      required
                     ></textarea>
                   </div>
                   <div className="mb-3">
@@ -43,19 +158,32 @@ function TaskApp() {
                     <input
                       type="date"
                       className="form-control"
-                      placeholder="Due date"
+                      name="dueDate"
+                      value={newTask.dueDate}
+                      onChange={handleChange}
+                      required
                     />
                   </div>
                   <div className="mb-3">
                     <label className="form-label">Priority</label>
-                    <select className="form-select">
-                      <option>Low</option>
-                      <option>Medium</option>
-                      <option>High</option>
+                    <select
+                      className="form-select"
+                      name="priority"
+                      value={newTask.priority}
+                      onChange={handleChange}
+                      required
+                    >
+                      <option value="Low">Low</option>
+                      <option value="Medium">Medium</option>
+                      <option value="High">High</option>
                     </select>
                   </div>
-                  <button type="submit" className="btn btn-primary">
-                    Add Task
+                  <button
+                    type="submit"
+                    className="btn btn-primary"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? "Creating task..." : "Create Task"}
                   </button>
                 </form>
               </div>
@@ -66,10 +194,7 @@ function TaskApp() {
             <div className="list-group">
               {/* Task list will go here */}
               <div className="list-group-item">
-                <h5 className="mb-1">Example Task</h5>
-                <p className="mb-1">This is an example task description</p>
-                <small className="text-muted">Due: Tomorrow</small>
-                <p>Priority: Low</p>
+                <div id="task-container"></div>
               </div>
             </div>
           </div>

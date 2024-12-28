@@ -7,6 +7,7 @@ import LoginForm from "./components/login/LoginForm";
 
 function App() {
   const [currentView, setCurrentView] = useState("home");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const handleNavigation = (view) => {
     setCurrentView(view);
@@ -17,19 +18,28 @@ function App() {
       case "register":
         return <RegistrationForm />;
       case "login":
-        return <LoginForm />;
+        return (
+          <LoginForm
+            onNavigate={handleNavigation}
+            setIsLoggedIn={setIsLoggedIn}
+          />
+        );
       default:
         return (
           <main className="container">
-            <TaskApp />
+            <TaskApp setIsLoggedIn={setIsLoggedIn} />
           </main>
         );
     }
   };
 
   return (
-    <div className="container-fluid">
-      <NavigationBar onNavigate={handleNavigation} />
+    <div className="">
+      <NavigationBar
+        onNavigate={handleNavigation}
+        isLoggedIn={isLoggedIn}
+        setIsLoggedIn={setIsLoggedIn}
+      />
       {renderView()}
     </div>
   );

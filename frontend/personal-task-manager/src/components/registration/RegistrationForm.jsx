@@ -1,5 +1,7 @@
 import { useState } from "react";
-function RegistrationForm() {
+import PropTypes from "prop-types";
+
+function RegistrationForm({ onNavigate }) {
   const [formData, setFormData] = useState({
     username: "",
     password: "",
@@ -8,6 +10,7 @@ function RegistrationForm() {
   });
 
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -34,16 +37,19 @@ function RegistrationForm() {
         },
         body: JSON.stringify({
           username: formData.username,
+          email: formData.email,
           password: formData.password,
         }),
       });
 
       if (response.ok) {
-        // Handle successful registration
-        console.log("Registration successful");
-        // You can add navigation or other success handling here
+        setSuccessMessage("Registration successful!");
+        setTimeout(() => {
+          onNavigate("home");
+        }, 2000);
       } else {
         const data = await response.json();
+        setSuccessMessage("");
         setError(data.message || "Registration failed");
       }
     } catch {
@@ -59,6 +65,9 @@ function RegistrationForm() {
             <div className="card-body">
               <h3 className="card-title text-center mb-4">Register</h3>
               {error && <div className="alert alert-danger">{error}</div>}
+              {successMessage && (
+                <div className="alert alert-success">{successMessage}</div>
+              )}
               <form onSubmit={handleSubmit}>
                 <div className="mb-3">
                   <label htmlFor="username" className="form-label">
@@ -116,7 +125,11 @@ function RegistrationForm() {
                     required
                   />
                 </div>
-                <button type="submit" className="btn btn-primary w-100">
+                <button
+                  type="submit"
+                  className="btn btn-primary w-100"
+                  onClick={handleSubmit}
+                >
                   Register
                 </button>
               </form>
@@ -127,5 +140,9 @@ function RegistrationForm() {
     </div>
   );
 }
+
+RegistrationForm.propTypes = {
+  onNavigate: PropTypes.func.isRequired,
+};
 
 export default RegistrationForm;

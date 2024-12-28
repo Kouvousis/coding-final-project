@@ -1,12 +1,37 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import PropTypes from "prop-types";
+import Cookies from "js-cookie";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowRightFromBracket } from "@fortawesome/free-solid-svg-icons";
+// TODO change fetch username function when Profiles are created in the backend
+function NavigationBar({ onNavigate, isLoggedIn, setIsLoggedIn }) {
+  const [username, setUsername] = useState("Unknown");
 
-function NavigationBar({ onNavigate }) {
-  const [isLoggedIn] = useState(false);
+  const fetchUsername = async () => {
+    const token = Cookies.get("access_token");
+    const response = await fetch("http://localhost:8000/api/user/", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      setUsername(data.username);
+    }
+  };
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      fetchUsername();
+    }
+  }, [isLoggedIn]);
 
   const handleHomeClick = (e) => {
     e.preventDefault();
-    onNavigate("home");
+    onNavigate("welcome");
   };
 
   const handleLoginClick = (e) => {
@@ -17,6 +42,16 @@ function NavigationBar({ onNavigate }) {
   const handleRegisterClick = (e) => {
     e.preventDefault();
     onNavigate("register");
+  };
+
+  const handleLogoutClick = (e) => {
+    e.preventDefault();
+    Cookies.remove("access_token");
+    Cookies.remove("refresh_token");
+    localStorage.clear();
+    setUsername("Unknown");
+    setIsLoggedIn(false);
+    onNavigate("home");
   };
 
   return (
@@ -49,11 +84,21 @@ function NavigationBar({ onNavigate }) {
                 </li>
               </>
             ) : (
-              <li className="nav-item">
-                <a className="nav-link" href="">
-                  Logout
-                </a>
-              </li>
+              <>
+                <li className="nav-item d-flex align-items-center">
+                  <span className="nav-link">Welcome {username}</span>
+                  <i
+                    onClick={handleLogoutClick}
+                    className="nav-link"
+                    style={{ cursor: "pointer" }}
+                  >
+                    <FontAwesomeIcon
+                      icon={faArrowRightFromBracket}
+                      style={{ color: "#ffffff" }}
+                    />
+                  </i>
+                </li>
+              </>
             )}
           </ul>
         </div>
@@ -63,6 +108,8 @@ function NavigationBar({ onNavigate }) {
 }
 NavigationBar.propTypes = {
   onNavigate: PropTypes.func.isRequired,
+  isLoggedIn: PropTypes.bool.isRequired,
+  setIsLoggedIn: PropTypes.func.isRequired,
 };
 
 export default NavigationBar;
