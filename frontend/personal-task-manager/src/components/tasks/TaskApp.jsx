@@ -6,8 +6,8 @@ function TaskApp() {
   const [newTask, setNewTask] = useState({
     title: "",
     description: "",
-    due_date: "",
-    priority: "Low",
+    dueDate: null,
+    priority: null,
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -39,20 +39,8 @@ function TaskApp() {
           <div class="card-body">
             <h5 class="card-title">${task.title}</h5>
             <p class="card-text">${task.description}</p>
-            <p class="card-text"><small class="text-muted">Due Date: ${
-              task.due_date
-            }</small></p>
-            <p class="card-text"><small class="text-muted">Priority: ${
-              task.priority
-            }</small></p>
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" ${
-                task.completed ? "checked" : ""
-              } disabled>
-              <label class="form-check-label">
-                Completed
-              </label>
-            </div>
+            <p class="card-text"><small class="text-muted">Due Date: ${task.due_date}</small></p>
+            <p class="card-text"><small class="text-muted">Priority: ${task.priority}</small></p>
             <div class="d-flex justify-content-end">
               <button class="btn btn-success complete-btn me-2">Complete</button>
               <button class="btn btn-danger delete-btn">Delete</button>
@@ -87,7 +75,7 @@ function TaskApp() {
       if (response.ok) {
         const data = await response.json();
         setTasks([...tasks, data]);
-        setNewTask({ title: "", description: "" });
+        setNewTask({ title: "", description: "", due_date: "", priority: "" });
       }
     } catch {
       setError("Failed to create task");
