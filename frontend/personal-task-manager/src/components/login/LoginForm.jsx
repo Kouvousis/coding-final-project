@@ -36,6 +36,8 @@ function LoginForm({ setIsLoggedIn, onNavigate }) {
       if (response.ok) {
         Cookies.set("access_token", data.tokens.access);
         Cookies.set("refresh_token", data.tokens.refresh);
+        Cookies.set("username", data.user.username);
+
         setIsLoggedIn(true);
         onNavigate("home");
       } else {
