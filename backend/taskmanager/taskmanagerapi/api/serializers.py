@@ -56,3 +56,4 @@ class LoginSerializer(serializers.Serializer):
             }
             return data
         raise serializers.ValidationError('Must include username and password')
+    

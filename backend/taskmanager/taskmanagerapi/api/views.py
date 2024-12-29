@@ -10,7 +10,6 @@ from django.contrib.auth.models import User
 from django.db.utils import IntegrityError
 from ..models import Task
 from .serializers import TaskSerializer, UserRegistrationSerializer, LoginSerializer
-#TODO Create Profiles for users
 class TaskViewSet(viewsets.ModelViewSet):
     authentication_classes = [JWTAuthentication, SessionAuthentication, BasicAuthentication]
     serializer_class = TaskSerializer
@@ -22,7 +21,7 @@ class TaskViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
         
-class UserViewSet(viewsets.ModelViewSet):
+class UserRegisterViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserRegistrationSerializer
 
