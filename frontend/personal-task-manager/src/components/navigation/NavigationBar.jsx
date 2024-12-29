@@ -3,31 +3,23 @@ import PropTypes from "prop-types";
 import Cookies from "js-cookie";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowRightFromBracket } from "@fortawesome/free-solid-svg-icons";
-// TODO change fetch username function when Profiles are created in the backend
+
 function NavigationBar({ onNavigate, isLoggedIn, setIsLoggedIn }) {
   const [username, setUsername] = useState("Unknown");
 
-  const fetchUsername = async () => {
-    const token = Cookies.get("access_token");
-    const response = await fetch("http://localhost:8000/api/user/", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      setUsername(data.username);
+  const handleUsername = () => {
+    const usernameFromCookie = Cookies.get("username");
+    if (usernameFromCookie) {
+      setUsername(usernameFromCookie);
+      setIsLoggedIn(true);
+    } else {
+      setIsLoggedIn(false);
     }
   };
 
   useEffect(() => {
-    if (isLoggedIn) {
-      fetchUsername();
-    }
-  }, [isLoggedIn]);
+    handleUsername();
+  });
 
   const handleHomeClick = (e) => {
     e.preventDefault();
@@ -48,6 +40,7 @@ function NavigationBar({ onNavigate, isLoggedIn, setIsLoggedIn }) {
     e.preventDefault();
     Cookies.remove("access_token");
     Cookies.remove("refresh_token");
+    Cookies.remove("username");
     localStorage.clear();
     setUsername("Unknown");
     setIsLoggedIn(false);
