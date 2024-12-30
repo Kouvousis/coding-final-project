@@ -45,7 +45,7 @@ function RegistrationForm({ onNavigate }) {
       if (response.ok) {
         setSuccessMessage("Registration successful!");
         setTimeout(() => {
-          onNavigate("home");
+          onNavigate("login");
         }, 2000);
       } else {
         const data = await response.json();
