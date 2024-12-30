@@ -23,7 +23,12 @@ function NavigationBar({ onNavigate, isLoggedIn, setIsLoggedIn }) {
 
   const handleHomeClick = (e) => {
     e.preventDefault();
-    onNavigate("welcome");
+    onNavigate("home");
+  };
+
+  const handleProfileClick = (e) => {
+    e.preventDefault();
+    onNavigate("profile");
   };
 
   const handleLoginClick = (e) => {
@@ -41,6 +46,7 @@ function NavigationBar({ onNavigate, isLoggedIn, setIsLoggedIn }) {
     Cookies.remove("access_token");
     Cookies.remove("refresh_token");
     Cookies.remove("username");
+    Cookies.remove("email");
     localStorage.clear();
     setUsername("Unknown");
     setIsLoggedIn(false);
@@ -79,7 +85,11 @@ function NavigationBar({ onNavigate, isLoggedIn, setIsLoggedIn }) {
             ) : (
               <>
                 <li className="nav-item d-flex align-items-center">
-                  <span className="nav-link">Welcome {username}</span>
+                  <a className="nav-link" href="" onClick={handleProfileClick}>
+                    Welcome {username}
+                  </a>
+                </li>
+                <li className="nav-item">
                   <i
                     onClick={handleLogoutClick}
                     className="nav-link"
