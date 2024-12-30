@@ -9,7 +9,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.db.utils import IntegrityError
 from ..models import Task
-from .serializers import TaskSerializer, UserRegistrationSerializer, LoginSerializer
+from .serializers import TaskSerializer, UserRegistrationSerializer, LoginSerializer, UserUpdateSerializer
 class TaskViewSet(viewsets.ModelViewSet):
     authentication_classes = [JWTAuthentication, SessionAuthentication, BasicAuthentication]
     serializer_class = TaskSerializer
@@ -89,3 +89,22 @@ class ProtectedView(APIView):
 
     def get(self, request):
         return Response({'message': 'This is a protected view'}, status=status.HTTP_200_OK)
+
+class UserUpdateView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request, *args, **kwargs):
+        user = request.user
+        serializer = UserUpdateSerializer(user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'message': 'User updated successfully'}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class UserDeleteView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, *args, **kwargs):
+        user = request.user
+        user.delete()
+        return Response({'message': 'User account deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
