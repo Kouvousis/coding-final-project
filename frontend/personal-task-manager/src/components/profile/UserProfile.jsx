@@ -7,6 +7,7 @@ function UserProfile({ onNavigate }) {
     email: "",
     username: "",
     password: "",
+    confirmPassword: "",
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -35,6 +36,13 @@ function UserProfile({ onNavigate }) {
     setIsLoading(true);
     setError("");
     setSuccess("");
+
+    if (user.password !== user.confirmPassword) {
+      setError("Passwords do not match");
+      setTimeout(() => setError(""), 3000);
+      setIsLoading(false);
+      return;
+    }
 
     try {
       const token = Cookies.get("access_token");
@@ -111,7 +119,7 @@ function UserProfile({ onNavigate }) {
       {error && <div className="alert alert-danger">{error}</div>}
       <form onSubmit={handleSubmit}>
         <div className="mb-3">
-          <label className="form-label">Email</label>
+          <label className="form-label">Change Email</label>
           <input
             type="email"
             className="form-control"
@@ -122,7 +130,7 @@ function UserProfile({ onNavigate }) {
           />
         </div>
         <div className="mb-3">
-          <label className="form-label">Username</label>
+          <label className="form-label">Change Username</label>
           <input
             type="text"
             className="form-control"
@@ -133,7 +141,7 @@ function UserProfile({ onNavigate }) {
           />
         </div>
         <div className="mb-3">
-          <label className="form-label">Password</label>
+          <label className="form-label">Change Password</label>
           <input
             type="password"
             className="form-control"
@@ -142,11 +150,22 @@ function UserProfile({ onNavigate }) {
             onChange={handleChange}
           />
         </div>
+        <div className="mb-3">
+          <label className="form-label">Confirm Password</label>
+          <input
+            type="password"
+            className="form-control"
+            name="confirmPassword"
+            value={user.confirmPassword}
+            onChange={handleChange}
+          />
+        </div>
       </form>
       <div className="d-flex justify-content-end mt-3">
         <button
           type="submit"
           className="btn btn-primary m-2"
+          onClick={handleSubmit}
           disabled={isLoading}
         >
           {isLoading ? "Updating..." : "Update Profile"}
