@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import Cookies from "js-cookie";
-// TODO Fix when deleting the last item of the paginated page to be returned to the previous page
+
 function TaskApp() {
   const [tasks, setTasks] = useState([]);
   const [completedTasks, setCompletedTasks] = useState([]);
@@ -16,6 +16,9 @@ function TaskApp() {
   const [success, setSuccess] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const tasksPerPage = 2;
+  const indexOfLastTask = currentPage * tasksPerPage;
+  const indexOfFirstTask = indexOfLastTask - tasksPerPage;
+  const currentTasks = tasks.slice(indexOfFirstTask, indexOfLastTask);
 
   const fetchAllTasks = async () => {
     setIsLoading(true);
@@ -89,14 +92,20 @@ function TaskApp() {
         },
       });
       if (response.ok) {
-        setTasks(tasks.filter((task) => task.id !== id));
+        const updatedTasks = tasks.filter((task) => task.id !== id);
+        setTasks(updatedTasks);
         setCompletedTasks(completedTasks.filter((task) => task.id !== id));
         setSuccess("Task deleted successfully");
         setTimeout(() => setSuccess(""), 3000);
 
-        const totalPages = Math.ceil(tasks.length / tasksPerPage);
+        const totalPages = Math.ceil(updatedTasks.length / tasksPerPage);
         if (currentPage > totalPages) {
           setCurrentPage(totalPages);
+        } else if (
+          updatedTasks.length % tasksPerPage === 0 &&
+          currentPage > 1
+        ) {
+          setCurrentPage(currentPage - 1);
         }
 
         fetchAllTasks();
@@ -121,10 +130,24 @@ function TaskApp() {
       });
 
       if (response.ok) {
-        const updatedTask = await response.json();
-        setTasks(tasks.map((task) => (task.id === id ? updatedTask : task)));
+        const updatedTasks = tasks.filter((task) => task.id !== id);
+        setTasks(updatedTasks);
+        setCompletedTasks([
+          ...completedTasks,
+          tasks.find((task) => task.id === id),
+        ]);
         setSuccess("Task completed successfully");
         setTimeout(() => setSuccess(""), 3000);
+
+        const totalPages = Math.ceil(updatedTasks.length / tasksPerPage);
+        if (currentPage > totalPages) {
+          setCurrentPage(totalPages);
+        } else if (
+          updatedTasks.length % tasksPerPage === 0 &&
+          currentPage > 1
+        ) {
+          setCurrentPage(currentPage - 1);
+        }
         fetchAllTasks();
       } else {
         setError("Failed to complete task");
@@ -157,9 +180,13 @@ function TaskApp() {
     setCurrentPage(pageNumber);
   };
 
-  const indexOfLastTask = currentPage * tasksPerPage;
-  const indexOfFirstTask = indexOfLastTask - tasksPerPage;
-  const currentTasks = tasks.slice(indexOfFirstTask, indexOfLastTask);
+  const getCurrentDate = () => {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, "0");
+    const dd = String(today.getDate()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}`;
+  };
 
   return (
     <div className="container">
@@ -212,6 +239,7 @@ function TaskApp() {
                       name="due_date"
                       value={newTask.due_date}
                       onChange={handleChange}
+                      min={getCurrentDate()}
                       required
                     />
                   </div>
