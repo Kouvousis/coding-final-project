@@ -50,7 +50,15 @@ function RegistrationForm({ onNavigate }) {
       } else {
         const data = await response.json();
         setSuccessMessage("");
-        setError(data.message || "Registration failed");
+        if (data.username) {
+          setError(data.username[0]);
+        } else if (data.email) {
+          setError(data.email[0]);
+        } else if (data.password) {
+          setError(data.password[0]);
+        } else {
+          setError(data.message || "Registration failed");
+        }
       }
     } catch {
       setError("Network error occurred");

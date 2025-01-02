@@ -36,7 +36,7 @@ class UserRegisterViewSet(viewsets.ModelViewSet):
                     status=status.HTTP_201_CREATED
                 )
             return Response(
-                serializer.errors,
+                {'error': 'Username already exists'},
                 status=status.HTTP_400_BAD_REQUEST
             )
         except IntegrityError:
