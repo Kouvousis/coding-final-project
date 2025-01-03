@@ -56,12 +56,22 @@ function UserProfile({ onNavigate }) {
       });
 
       if (response.ok) {
-        setSuccess("Profile updated successfully");
-        setTimeout(() => setSuccess(""), 3000);
         Cookies.set("username", user.username);
         Cookies.set("email", user.email);
+        setSuccess("Profile updated successfully");
+        setTimeout(() => setSuccess(""), 3000);
       } else {
-        setError("Failed to update profile");
+        const data = await response.json();
+        setSuccess("");
+        if (data.username) {
+          setError(data.username[0]);
+        } else if (data.email) {
+          setError(data.email[0]);
+        } else if (data.password) {
+          setError(data.password[0]);
+        } else {
+          setError(data.message || "Registration failed");
+        }
       }
     } catch {
       setError("Network error occurred");
@@ -97,7 +107,6 @@ function UserProfile({ onNavigate }) {
           Cookies.remove("username");
           Cookies.remove("email");
           localStorage.clear();
-          // Redirect to login or home page after account deletion
           setTimeout(() => {
             onNavigate("login");
           }, 3000);
