@@ -15,10 +15,19 @@ function TaskApp() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [completedCurrentPage, setCompletedCurrentPage] = useState(1);
   const tasksPerPage = 2;
+
   const indexOfLastTask = currentPage * tasksPerPage;
   const indexOfFirstTask = indexOfLastTask - tasksPerPage;
   const currentTasks = tasks.slice(indexOfFirstTask, indexOfLastTask);
+
+  const indexOfLastCompletedTask = completedCurrentPage * tasksPerPage;
+  const indexOfFirstCompletedTask = indexOfLastCompletedTask - tasksPerPage;
+  const currentCompletedTasks = completedTasks.slice(
+    indexOfFirstCompletedTask,
+    indexOfLastCompletedTask
+  );
 
   const fetchAllTasks = async () => {
     setIsLoading(true);
@@ -74,6 +83,7 @@ function TaskApp() {
         });
         setSuccess("Task created successfully");
         setTimeout(() => setSuccess(""), 3000);
+        setCurrentPage(Math.ceil((tasks.length + 1) / tasksPerPage));
         fetchAllTasks();
       }
     } catch {
@@ -178,6 +188,10 @@ function TaskApp() {
 
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
+  };
+
+  const handleCompletedPageChange = (pageNumber) => {
+    setCompletedCurrentPage(pageNumber);
   };
 
   const getCurrentDate = () => {
@@ -324,10 +338,35 @@ function TaskApp() {
           <div className="col-md-12">
             <h5>Completed Tasks</h5>
             <div className="list-group">
-              {completedTasks.map((task) => (
+              {currentCompletedTasks.map((task) => (
                 <div key={task.id} className="list-group-item">
                   <div className="card-body">
                     <h5 className="card-title">{task.title}</h5>
+                    <p className="card-text">{task.description}</p>
+                    <p className="card-text">
+                      <small className="text-muted">
+                        Due Date: {task.due_date}
+                      </small>
+                    </p>
+                    <p className="card-text">
+                      <small className="text-muted">
+                        Completed At:{" "}
+                        {new Date(task.completed_at).toLocaleString()}
+                      </small>
+                    </p>
+                    <p
+                      className={`card-text ${
+                        new Date(task.due_date) < new Date(task.completed_at)
+                          ? "text-danger"
+                          : "text-success"
+                      }`}
+                    >
+                      <small className="">
+                        {new Date(task.due_date) < new Date(task.completed_at)
+                          ? "Completed Late"
+                          : "Completed On Time"}
+                      </small>
+                    </p>
                     <div className="d-flex justify-content-end">
                       <button
                         className="btn btn-danger delete-btn"
@@ -339,6 +378,24 @@ function TaskApp() {
                   </div>
                 </div>
               ))}
+            </div>
+            <div className="pagination">
+              {Array.from(
+                { length: Math.ceil(completedTasks.length / tasksPerPage) },
+                (_, i) => (
+                  <button
+                    key={i + 1}
+                    onClick={() => handleCompletedPageChange(i + 1)}
+                    className={`btn m-1 ${
+                      completedCurrentPage === i + 1
+                        ? "btn-primary"
+                        : "btn-secondary"
+                    }`}
+                  >
+                    {i + 1}
+                  </button>
+                )
+              )}
             </div>
           </div>
         </div>
