@@ -95,7 +95,7 @@ class UserUpdateView(APIView):
 
     def put(self, request, *args, **kwargs):
         user = request.user
-        serializer = UserUpdateSerializer(user, data=request.data, partial=True)
+        serializer = UserUpdateSerializer(user, data=request.data, partial=True, context={'request': request})
         if serializer.is_valid():
             serializer.save()
             return Response({'message': 'User updated successfully'}, status=status.HTTP_200_OK)
