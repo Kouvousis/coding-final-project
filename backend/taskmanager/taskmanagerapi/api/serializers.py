@@ -19,12 +19,14 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         fields = ['username', 'email', 'password']
         
     def validate_username(self, value):
-        if User.objects.filter(username=value).exists():
+        user = self.context['request'].user
+        if User.objects.filter(username=value).exclude(id=user.id).exists():
             raise serializers.ValidationError('Username already exists')
         return value
-        
+
     def validate_email(self, value):
-        if User.objects.filter(email=value).exists():
+        user = self.context['request'].user
+        if User.objects.filter(email=value).exclude(id=user.id).exists():
             raise serializers.ValidationError('Email already exists')
         return value
 

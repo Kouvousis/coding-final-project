@@ -26,29 +26,17 @@ class UserRegisterViewSet(viewsets.ModelViewSet):
     serializer_class = UserRegistrationSerializer
 
     def create(self, request, *args, **kwargs):
-        try:
-            serializer = self.get_serializer(data=request.data)
-            serializer.is_valid(raise_exception=True)
-            if serializer.is_valid():
-                self.perform_create(serializer)
-                return Response(
-                    {'message': 'User registered successfully'},
-                    status=status.HTTP_201_CREATED
-                )
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        if serializer.is_valid():
+            self.perform_create(serializer)
             return Response(
-                {'error': 'Username already exists'},
-                status=status.HTTP_400_BAD_REQUEST
+                {'message': 'User registered successfully'},
+                status=status.HTTP_201_CREATED
             )
-        except IntegrityError:
-            return Response(
-                {'error': 'Email already exists'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        except Exception as e:
-            return Response(
-                {'error': str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+
+
+
             
 class LoginView(APIView):
     serializer_class = LoginSerializer
