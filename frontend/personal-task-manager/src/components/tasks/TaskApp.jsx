@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import Cookies from "js-cookie";
-
+// TODO test complete task pagination
 function TaskApp() {
   const [tasks, setTasks] = useState([]);
   const [completedTasks, setCompletedTasks] = useState([]);
@@ -103,8 +103,11 @@ function TaskApp() {
       });
       if (response.ok) {
         const updatedTasks = tasks.filter((task) => task.id !== id);
+        const updatedCompletedTasks = completedTasks.filter(
+          (task) => task.id !== id
+        );
         setTasks(updatedTasks);
-        setCompletedTasks(completedTasks.filter((task) => task.id !== id));
+        setCompletedTasks(updatedCompletedTasks);
         setSuccess("Task deleted successfully");
         setTimeout(() => setSuccess(""), 3000);
 
@@ -116,6 +119,18 @@ function TaskApp() {
           currentPage > 1
         ) {
           setCurrentPage(currentPage - 1);
+        }
+
+        const totalCompletedPages = Math.ceil(
+          updatedCompletedTasks.length / tasksPerPage
+        );
+        if (completedCurrentPage > totalCompletedPages) {
+          setCompletedCurrentPage(totalCompletedPages);
+        } else if (
+          updatedCompletedTasks.length % tasksPerPage === 0 &&
+          completedCurrentPage > 1
+        ) {
+          setCompletedCurrentPage(completedCurrentPage - 1);
         }
 
         fetchAllTasks();
