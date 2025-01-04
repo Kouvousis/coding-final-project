@@ -11,9 +11,9 @@ from django.db.utils import IntegrityError
 from ..models import Task
 from .serializers import TaskSerializer, UserRegistrationSerializer, LoginSerializer, UserUpdateSerializer
 class TaskViewSet(viewsets.ModelViewSet):
-    authentication_classes = [JWTAuthentication, SessionAuthentication, BasicAuthentication]
-    serializer_class = TaskSerializer
+    authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
+    serializer_class = TaskSerializer
     
     def get_queryset(self):
         return Task.objects.filter(user=self.request.user)
@@ -22,17 +22,24 @@ class TaskViewSet(viewsets.ModelViewSet):
         serializer.save(user=self.request.user)
         
 class UserRegisterViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
     serializer_class = UserRegistrationSerializer
 
+    def get_queryset(self):
+        return User.objects.filter(id=self.request.user.id)
+
     def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        if serializer.is_valid():
+        try:
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
             self.perform_create(serializer)
             return Response(
                 {'message': 'User registered successfully'},
                 status=status.HTTP_201_CREATED
+            )
+        except IntegrityError:
+            return Response(
+                {'error': 'Username or email already exists'},
+                status=status.HTTP_400_BAD_REQUEST
             )
 
 
@@ -66,10 +73,10 @@ class LoginView(APIView):
                 }
             }, status=status.HTTP_200_OK)
 
-        except Exception as e:
+        except ValueError as e:
             return Response(
-                {'error': str(e)}, 
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                {'error': f'Value error: {str(e)}'}, 
+                status=status.HTTP_400_BAD_REQUEST
             )
             
 class ProtectedView(APIView):
@@ -79,6 +86,7 @@ class ProtectedView(APIView):
         return Response({'message': 'This is a protected view'}, status=status.HTTP_200_OK)
 
 class UserUpdateView(APIView):
+    authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
     def put(self, request, *args, **kwargs):
@@ -90,6 +98,7 @@ class UserUpdateView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class UserDeleteView(APIView):
+    authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
     def delete(self, request, *args, **kwargs):

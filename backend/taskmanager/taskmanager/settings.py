@@ -48,15 +48,6 @@ INSTALLED_APPS = [
     'corsheaders',
 ]
 
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ),
-        'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticated',
-    ),
-}
-
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
@@ -115,13 +106,6 @@ CORS_ALLOW_HEADERS = [
     'x-requested-with',
 ]
 
-# Set SameSite attribute for session cookies
-SESSION_COOKIE_SAMESITE = 'None'
-SESSION_COOKIE_SECURE = True
-
-# Set SameSite attribute for CSRF cookies
-CSRF_COOKIE_SAMESITE = 'None'
-CSRF_COOKIE_SECURE = True
 
 TEMPLATES = [
     {
