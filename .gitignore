@@ -15,7 +15,6 @@
 # Python virtual environment
 venv/
 env/
-.env/
 .venv/
 ENV/
 
@@ -28,7 +27,7 @@ __pycache__/
 db.sqlite3
 
 # Logs
-logs
+logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
@@ -36,7 +35,24 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
+# Node.js
+node_modules/
+dist/
+dist-ssr/
+
+# React build output
+build/
+
+# Local env files
+.env
+*.env
+
+# PyCharm
+.idea/
+
+# Coverage reports
+.coverage
+*.cover
+
+# Django migrations (optional - if you don't want to track migrations)
+# migrations/
